@@ -30,18 +30,55 @@ public class Game {
     }
 
     private void inicializarGrafoEjemplo() {
-        // Grafo simple: A -> B -> C -> D -> E
-        // Con algunas conexiones adicionales
-        grafo.put("A", Arrays.asList("B", "C"));
-        grafo.put("B", Arrays.asList("C", "D"));
-        grafo.put("C", Arrays.asList("D"));
-        grafo.put("D", Arrays.asList("E"));
-        grafo.put("E", new ArrayList<>());
+        Random random = new Random();
+        int numNodos = 10 + random.nextInt(6); // Entre 10 y 15 nodos
+        List<String> nodos = new ArrayList<>();
+        
+        // Generar nombres de nodos (A, B, C, ..., Z si es necesario)
+        for (int i = 0; i < numNodos; i++) {
+            char letra = (char) ('A' + i);
+            nodos.add(String.valueOf(letra));
+            grafo.put(String.valueOf(letra), new ArrayList<>());
+        }
+        
+        // Crear un camino base garantizado del primer al último nodo
+        for (int i = 0; i < nodos.size() - 1; i++) {
+            String actual = nodos.get(i);
+            String siguiente = nodos.get(i + 1);
+            grafo.get(actual).add(siguiente);
+        }
+        
+        // Agregar conexiones aleatorias adicionales
+        for (int i = 0; i < numNodos * 2; i++) {
+            String nodoOrigen = nodos.get(random.nextInt(numNodos - 1)); // No el último
+            String nodoDestino = nodos.get(random.nextInt(numNodos));
+            
+            // Evitar bucles y conexiones ya existentes
+            if (!nodoOrigen.equals(nodoDestino) && 
+                !grafo.get(nodoOrigen).contains(nodoDestino)) {
+                grafo.get(nodoOrigen).add(nodoDestino);
+            }
+        }
+        
+        // Agregar algunas conexiones cruzadas para hacer el grafo más interesante
+        for (int i = 0; i < numNodos / 2; i++) {
+            int idx1 = random.nextInt(numNodos - 2);
+            int idx2 = random.nextInt(numNodos - idx1 - 1) + idx1 + 2;
+            if (idx2 < numNodos) {
+                String nodo1 = nodos.get(idx1);
+                String nodo2 = nodos.get(idx2);
+                if (!grafo.get(nodo1).contains(nodo2)) {
+                    grafo.get(nodo1).add(nodo2);
+                }
+            }
+        }
     }
 
     private void calcularRecorridoCorrecto() {
-        String origen = "A";
-        String destino = "E";
+        List<String> nodosOrdenados = new ArrayList<>(grafo.keySet());
+        Collections.sort(nodosOrdenados);
+        String origen = nodosOrdenados.get(0);
+        String destino = nodosOrdenados.get(nodosOrdenados.size() - 1);
         
         if ("DFS".equals(algoritmo)) {
             recorridoCorrecto = dfs(origen, destino);
