@@ -28,7 +28,7 @@ public class Game {
         inicializarGrafoEjemplo();
         calcularRecorridoCorrecto();
     }
-
+///
     private void inicializarGrafoEjemplo() {
         Random random = new Random();
         int numNodos = 10 + random.nextInt(6); // Entre 10 y 15 nodos
