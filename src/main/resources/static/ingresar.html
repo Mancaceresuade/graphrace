@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unirse a Partida - Graph Race</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-pink-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Unirse a Partida</h1>
+        
+        <form id="ingresarForm" class="space-y-4">
+            <div>
+                <label for="nombreJugador" class="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre del Jugador
+                </label>
+                <input 
+                    type="text" 
+                    id="nombreJugador" 
+                    name="nombreJugador" 
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Ingresa tu nombre">
+            </div>
+
+            <div>
+                <label for="gameId" class="block text-sm font-medium text-gray-700 mb-2">
+                    Código de Partida
+                </label>
+                <input 
+                    type="text" 
+                    id="gameId" 
+                    name="gameId" 
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase"
+                    placeholder="Ingresa el código">
+            </div>
+
+            <button 
+                type="submit" 
+                class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition duration-200 shadow-md">
+                Unirse
+            </button>
+        </form>
+
+        <div id="error" class="mt-4 hidden">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p class="text-red-800 text-sm" id="errorMessage"></p>
+            </div>
+        </div>
+
+        <div id="cargando" class="mt-4 hidden">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-blue-800 text-sm text-center">Verificando partida...</p>
+            </div>
+        </div>
+
+        <div class="mt-6 text-center">
+            <a href="/crear.html" class="text-purple-600 hover:text-purple-800 text-sm">
+                ¿Quieres crear una partida? Haz clic aquí
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Obtener gameId de la URL si existe
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameIdFromUrl = urlParams.get('gameId');
+        if (gameIdFromUrl) {
+            document.getElementById('gameId').value = gameIdFromUrl.toUpperCase();
+        }
+
+        // Obtener nombre de la URL si existe
+        const nombreFromUrl = urlParams.get('nombre');
+        if (nombreFromUrl) {
+            document.getElementById('nombreJugador').value = nombreFromUrl;
+        }
+
+        document.getElementById('ingresarForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nombreJugador = document.getElementById('nombreJugador').value;
+            const gameId = document.getElementById('gameId').value.toUpperCase();
+
+            document.getElementById('error').classList.add('hidden');
+            document.getElementById('cargando').classList.remove('hidden');
+
+            try {
+                // Verificar que el juego existe
+                const response = await fetch(`/api/juego/${gameId}`);
+                
+                if (response.ok) {
+                    const juego = await response.json();
+                    
+                    // Redirigir a jugar.html con los parámetros
+                    window.location.href = `/jugar.html?gameId=${gameId}&nombre=${encodeURIComponent(nombreJugador)}`;
+                } else {
+                    document.getElementById('errorMessage').textContent = 'Juego no encontrado. Verifica el código.';
+                    document.getElementById('error').classList.remove('hidden');
+                    document.getElementById('cargando').classList.add('hidden');
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 'Error de conexión. Intenta nuevamente.';
+                document.getElementById('error').classList.remove('hidden');
+                document.getElementById('cargando').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
+
